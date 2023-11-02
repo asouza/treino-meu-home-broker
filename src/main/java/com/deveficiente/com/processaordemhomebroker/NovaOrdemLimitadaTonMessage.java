@@ -2,12 +2,17 @@ package com.deveficiente.com.processaordemhomebroker;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public class NovaOrdemimitadaEOCRequest {
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public class NovaOrdemLimitadaTonMessage {
 
     @NotBlank
     private String ativo;
@@ -20,8 +25,9 @@ public class NovaOrdemimitadaEOCRequest {
     @Positive
     private BigDecimal preco;
 
-    NovaOrdemimitadaEOCRequest(@NotBlank String ativo, @Min(1) int quantidade, @NotBlank String codigoCorretora,
-            @NotNull TipoOrdem tipoOrdem, @Positive BigDecimal preco) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    NovaOrdemLimitadaTonMessage(@NotBlank @JsonProperty("ativo") String ativo, @Min(1) @JsonProperty("quantidade") int quantidade, @NotBlank  @JsonProperty("codigoCorretora") String codigoCorretora,
+            @NotNull @JsonProperty("tipoOrdem") TipoOrdem tipoOrdem, @Positive @JsonProperty("preco") BigDecimal preco) {
         this.ativo = ativo;
         this.quantidade = quantidade;
         this.codigoCorretora = codigoCorretora;
@@ -31,10 +37,7 @@ public class NovaOrdemimitadaEOCRequest {
 
     @Override
     public String toString() {
-        return "NovaOrdemimitadaEOCRequest [ativo=" + ativo + ", quantidade=" + quantidade + ", codigoCorretora="
+        return "NovaOrdemLimitadaTonMessage [ativo=" + ativo + ", quantidade=" + quantidade + ", codigoCorretora="
                 + codigoCorretora + ", tipoOrdem=" + tipoOrdem + ", preco=" + preco + "]";
     }
-
-    
-
 }
