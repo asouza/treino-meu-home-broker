@@ -2,6 +2,8 @@ package com.deveficiente.com.processaordemhomebroker;
 
 import java.math.BigDecimal;
 
+import org.springframework.util.Assert;
+
 import com.deveficiente.com.processaordemhomebroker.compartilhado.Resultado;
 
 import jakarta.persistence.CascadeType;
@@ -27,7 +29,7 @@ public class Cliente {
     //isso podia ser computado pelo histórico de creditos, compras e vendas.
     private BigDecimal saldoAtual = BigDecimal.ZERO;
 
-    @OneToOne(mappedBy = "cliente",cascade = CascadeType.PERSIST)
+    @OneToOne(mappedBy = "cliente",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
 	private Carteira carteira;
     
     @Deprecated
@@ -85,6 +87,48 @@ public class Cliente {
 
 	public String getCodigo() {
 		return codigo;
+	}
+
+	public void atualizaCarteira(ExecucaoOrdem execucao) {
+		Assert.isTrue(execucao.isSucesso(), "Não pode atualizar a carteira em funcao de uma execucao que falhou");
+		
+		//conseguir executar essa logica me indica qeu as coisas estão no lugar certo
+		boolean podeRealizarOperacao = this.podeRealizarOperacao(new InfoOperacao() {
+			
+			@Override
+			public TipoOferta getTipoOferta() {
+				return execucao.getTipoOferta();
+			}
+			
+			@Override
+			public int getQuantidade() {
+				return execucao.getQuantidade();
+			}
+			
+			@Override
+			public BigDecimal getPreco() {
+				//como eu sei que foi sucesso, não preciso testar
+				return execucao.getPreco().get();
+			}
+			
+			@Override
+			public String getAtivo() {
+				return execucao.getAtivo();
+			}
+		}).isSucesso();
+		
+		Assert.isTrue(podeRealizarOperacao, "O cliente não tem condicoes de executar essa operacao. Esta chamada não devia ter acontecido");
+		this.carteira.atualizaAtivos(execucao);
+		
+		if(execucao.isCompra()) {
+			//quero restringir a atualizacao da carteira para uma execucao
+			//poderia facilitar e passar uma ordem, um ativo. Quanto mais flexível, maior a chance de fazer caca
+			this.saldoAtual = this.saldoAtual.subtract(execucao.getPreco().get());
+		} else {
+			this.saldoAtual = this.saldoAtual.add(execucao.getPreco().get());
+		}
+		
+		
 	}
 
 }

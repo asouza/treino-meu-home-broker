@@ -32,5 +32,9 @@ public class Resultado<TipoProblema extends RuntimeException, TipoSucesso> {
 		return this.problema;
 	}
 
+	public boolean isSucesso() {
+		return this.sucesso;
+	}
+
 
 }

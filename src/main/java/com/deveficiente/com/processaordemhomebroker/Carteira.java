@@ -56,4 +56,8 @@ public class Carteira {
     }
 
 
+	public void atualizaAtivos(ExecucaoOrdem execucao) {
+		this.ativos.add(execucao.toAtivo());
+	}
+
 }

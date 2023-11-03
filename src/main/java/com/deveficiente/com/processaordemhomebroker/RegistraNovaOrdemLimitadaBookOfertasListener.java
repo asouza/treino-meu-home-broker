@@ -60,12 +60,6 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 		 * para processar a ordem seguindo o tipo e considerando a validade
 		 */
 
-		Optional<BookOfertas> possivelBook = bookOfertasRepository
-				.findByAtivo(novaOrdemLimitadaMessage.getAtivo());
-		Assert.isTrue(possivelBook.isPresent(),
-				"Não existe book de ofertas para o ativo "
-						+ novaOrdemLimitadaMessage.getAtivo());
-
 		Log5WBuilder.metodo().oQueEstaAcontecendo("Salvando nova ordem")
 				.adicionaInformacao("ativo",
 						novaOrdemLimitadaMessage.getAtivo())
@@ -73,9 +67,18 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 						novaOrdemLimitadaMessage.getPreco().toString())
 				.info(log);
 		
-		Cliente cliente = clienteRepository.getByCodigo(mensagem.get("codigoCliente"));
+		
 
 		OrdemLimitada novaOrdemAdicionada = executaTransacao.comRetorno(() -> {
+			
+			Optional<BookOfertas> possivelBook = bookOfertasRepository
+					.findByAtivo(novaOrdemLimitadaMessage.getAtivo());
+			Assert.isTrue(possivelBook.isPresent(),
+					"Não existe book de ofertas para o ativo "
+							+ novaOrdemLimitadaMessage.getAtivo());
+			
+			Cliente cliente = clienteRepository.getByCodigo(mensagem.get("codigoCliente"));
+			
 			 return possivelBook.get()
 					.adiciona(bookOfertas -> {
 						return novaOrdemLimitadaMessage.toModel(bookOfertas,cliente);
@@ -97,9 +100,19 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 		 * outra que altere o estado do book. Isso é aceitável ou precisa de um
 		 * snapshot do book? Apesar que o snapshot não parece escalável
 		 */
+		
+		Log5WBuilder.metodo()
+		.oQueEstaAcontecendo("Envinado mensagem para executar a ordem colocada no book")
+		.adicionaInformacao("codigoOrdem", novaOrdemAdicionada.getCodigo().toString())
+		.info(log);		
 
 		this.jmsTemplate.convertAndSend("processa-ordem-limitada-ton",
-				Map.of("codigoOrdem", novaOrdemAdicionada.getCodigo()));
+				Map.of("codigoOrdem", novaOrdemAdicionada.getCodigo().toString()));
+		
+		Log5WBuilder.metodo()
+		.oQueEstaAcontecendo("Ordem enviada para ser executada")
+		.adicionaInformacao("codigoOrdem", novaOrdemAdicionada.getCodigo().toString())
+		.info(log);		
 
 	}
 }

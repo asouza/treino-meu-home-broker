@@ -7,6 +7,11 @@ public class AtivoCarteiraCliente {
 
 	private String codigo;
 	private int quantidade;
+	
+	@Deprecated
+	public AtivoCarteiraCliente() {
+		// TODO Auto-generated constructor stub
+	}
 
 	public AtivoCarteiraCliente(String codigo, int quantidade) {
 		super();
@@ -21,5 +26,6 @@ public class AtivoCarteiraCliente {
 	public boolean temQuantidade(int quantidade) {
 		return this.quantidade >= quantidade;
 	}
+		
 
 }

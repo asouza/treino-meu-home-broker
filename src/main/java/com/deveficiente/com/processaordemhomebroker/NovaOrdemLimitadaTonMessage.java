@@ -3,6 +3,8 @@ package com.deveficiente.com.processaordemhomebroker;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -51,6 +53,7 @@ public class NovaOrdemLimitadaTonMessage implements NovaOrdemLimitadaMessage {
 	}
 
 	public OrdemLimitada toModel(BookOfertas bookOfertas,Cliente cliente) {
+		Assert.isTrue(bookOfertas.pertenceAAtivo(this.ativo), "O book de ofertas de uma nova ordem precisa ser do ativo da ordem. Ativo Book = "+bookOfertas.getAtivo()+" & Ativo ordem = "+this.ativo);
 		// aqui tem que usar um builder para criar a ordem considerando a
 		// especificidade
 		// Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora,
