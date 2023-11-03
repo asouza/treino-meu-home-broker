@@ -45,12 +45,12 @@ public class NovaOrdemLimitadaTonMessage {
                 + codigoCorretora + ", tipoOrdem=" + tipoOrdem + ", preco=" + preco + "]";
     }
 
-    public Ordem toModel(BookOfertas bookOfertas) {
+    public OrdemLimitada toModel(BookOfertas bookOfertas) {
         //aqui tem que usar um builder para criar a ordem considerando a especificidade
         //Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora, tipoOrdem, preco)
         //precisa enriquecer a ordem com o tipo dela(mercado,limitada etc,), validadade e infos especificas.
         //Se for limitada -> tem preco
-        return Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora, tipoOrdem, preco);
+        return OrdemLimitada.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora, tipoOrdem, preco);
     }
 
     public BigDecimal getPreco() {

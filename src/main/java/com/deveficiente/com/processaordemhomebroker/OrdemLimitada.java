@@ -22,7 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 @Entity
-public class Ordem {
+public class OrdemLimitada {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,33 +36,29 @@ public class Ordem {
     @ManyToOne
     private BookOfertas bookOfertas;
     private LocalDateTime instante;
-    private TipoOrdem tipoOrdem;
     private TipoValidade tipoValidade;
 
     @ElementCollection
     @MapKeyColumn(name = "chave")
     @Column(name = "valor")
-    private Map<String, String> dadosExtrasTipoOrdem = new HashMap<>();    
-
-    @ElementCollection
-    @MapKeyColumn(name = "chave")
-    @Column(name = "valor")
-    private Map<String, String> dadosExtrasTipoValidade = new HashMap<>();        
+    private Map<String, String> dadosExtrasTipoValidade = new HashMap<>();
+    @NotNull
+    @Positive
+    private BigDecimal preco;        
 
     @Deprecated
-    public Ordem(){
+    public OrdemLimitada(){
 
     }
 
-    private Ordem(BookOfertas bookOfertas,TipoOrdem tipoOrdem,TipoValidade tipoValidade,int quantidade, String codigoCorretora, TipoOferta tipoOferta, Map<String, String> dadosExtrasTipoOrdem, Map<String, String> dadosExtrasTipoValidade) {
+    private OrdemLimitada(BookOfertas bookOfertas,TipoValidade tipoValidade,BigDecimal preco ,int quantidade, String codigoCorretora, TipoOferta tipoOferta, Map<String, String> dadosExtrasTipoValidade) {
         this.bookOfertas = bookOfertas;
-        this.tipoOrdem = tipoOrdem;
         this.tipoValidade = tipoValidade;
+        this.preco = preco;
         this.quantidade = quantidade;
         this.codigoCorretora = codigoCorretora;
         this.tipoOferta = tipoOferta;
         this.instante = LocalDateTime.now();
-        this.dadosExtrasTipoOrdem = dadosExtrasTipoOrdem;
         this.dadosExtrasTipoValidade = dadosExtrasTipoValidade;
     }
 
@@ -74,12 +70,11 @@ public class Ordem {
         return instante;
     }
 
-    public static Ordem novaLimitadaTON(BookOfertas bookOfertas, @Min(1) int quantidade,
+    public static OrdemLimitada novaLimitadaTON(BookOfertas bookOfertas, @Min(1) int quantidade,
             @NotBlank String codigoCorretora, @NotNull TipoOferta tipoOrdem, @Positive BigDecimal preco) {
-        Map<String,String> dadosExtrasTipoOrdem = Map.of("preco",preco.toString());
         Map<String,String> dadosExtrasTipoValidade = new HashMap<>();
 
-        return new Ordem(bookOfertas,TipoOrdem.limitada,TipoValidade.TON ,quantidade, codigoCorretora, tipoOrdem,dadosExtrasTipoOrdem,dadosExtrasTipoValidade);
+        return new OrdemLimitada(bookOfertas,TipoValidade.TON ,preco,quantidade, codigoCorretora, tipoOrdem,dadosExtrasTipoValidade);
     }
     
     /**
@@ -87,16 +82,21 @@ public class Ordem {
      * @param <T>
      * @return o objeto que representa os dados extras da ordem de determinado tipo
      */
-    public <T> T getDadosExtrasTipoOrdem() {                
-        return (T) this.tipoOrdem.getDadosExtras(this.dadosExtrasTipoOrdem);
-    }
-
-    /**
-     * 
-     * @param <T>
-     * @return o objeto que representa os dados extras da ordem de determinado tipo
-     */
     public <T> T getDadosExtrasTipoValidade() {                
         return (T) this.tipoValidade.getDadosExtras(this.dadosExtrasTipoValidade);
-    }    
+    }
+
+    public BigDecimal getPreco() {
+        return this.preco;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public TipoValidade getTipoValidade() {
+        return tipoValidade;
+    }
+
+
 }
