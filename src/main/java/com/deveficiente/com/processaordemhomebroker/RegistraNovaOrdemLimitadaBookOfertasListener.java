@@ -15,41 +15,52 @@ import com.deveficiente.com.processaordemhomebroker.compartilhado.Log5WBuilder;
 import jakarta.transaction.Transactional;
 
 @Component
-public class RegistraNovaOrdemLimitadaTonBookOfertasListener {
+public class RegistraNovaOrdemLimitadaBookOfertasListener {
 
 	private BookOfertasRepository bookOfertasRepository;
 	private JmsTemplate jmsTemplate;
 
 
 	private static final Logger log = LoggerFactory
-	.getLogger(RegistraNovaOrdemLimitadaTonBookOfertasListener.class);
+	.getLogger(RegistraNovaOrdemLimitadaBookOfertasListener.class);
 
-	public RegistraNovaOrdemLimitadaTonBookOfertasListener(BookOfertasRepository bookOfertasRepository,JmsTemplate jmsTemplate) {
+	public RegistraNovaOrdemLimitadaBookOfertasListener(BookOfertasRepository bookOfertasRepository,JmsTemplate jmsTemplate) {
 		this.bookOfertasRepository = bookOfertasRepository;
 		this.jmsTemplate = jmsTemplate;
 	}	
 
 	
-    @JmsListener(destination = "insere-book-ofertas-limitada-ton", containerFactory = "myFactory")
+    @JmsListener(destination = "insere-book-ofertas-limitada", containerFactory = "myFactory")
 	@Transactional
-	public void receiveMessage(NovaOrdemLimitadaTonMessage ordem) {
+	public void receiveMessage(Map<String, String> mensagem) {
+    	
+    	Assert.isTrue(mensagem.containsKey("tipoValidade"), "O tipo de validade é obrigatório para processar uma ordem limitada");
+    	
+    	TipoValidade tipoValidade = TipoValidade.converte(mensagem.get("tipoValidade"));
+    	
+    	//aqui eu entendi que precisava de polimorfismo para lidar com os outros tipos de validade. 
+    	//ao mesmo tempo o número de validade é fixo, poderia ser quatro ifs
+    	NovaOrdemLimitadaMessage novaOrdemLimitadaMessage = tipoValidade.criaNovaLimitadaMessage(mensagem);
+    	
 		/*
 		 * Carrego o book de ofertas para o ativo
 		 * Registro a ordem
 		 * Mando agora para processar a ordem seguindo o tipo e considerando a validade
 		 */
 
-		 Optional<BookOfertas> possivelBook = bookOfertasRepository.findByAtivo(ordem.getAtivo());
-		 Assert.isTrue(possivelBook.isPresent(),"Não existe book de ofertas para o ativo "+ordem.getAtivo());
+		 Optional<BookOfertas> possivelBook = bookOfertasRepository.findByAtivo(novaOrdemLimitadaMessage.getAtivo());
+		 Assert.isTrue(possivelBook.isPresent(),"Não existe book de ofertas para o ativo "+novaOrdemLimitadaMessage.getAtivo());
+		 
+		 
 
 		Log5WBuilder
 			.metodo()
 			.oQueEstaAcontecendo("Salvando nova ordem")
-			.adicionaInformacao("ativo", ordem.getAtivo())
-			.adicionaInformacao("preco", ordem.getPreco().toString())
+			.adicionaInformacao("ativo", novaOrdemLimitadaMessage.getAtivo())
+			.adicionaInformacao("preco", novaOrdemLimitadaMessage.getPreco().toString())
 			.info(log);
 
-		OrdemLimitada novaOrdemAdicionada = possivelBook.get().adiciona(ordem :: toModel);
+		OrdemLimitada novaOrdemAdicionada = possivelBook.get().adiciona(novaOrdemLimitadaMessage :: toModel);
 
 		Log5WBuilder
 			.metodo()

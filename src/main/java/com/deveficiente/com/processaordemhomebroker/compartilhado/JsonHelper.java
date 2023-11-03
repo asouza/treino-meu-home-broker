@@ -14,32 +14,40 @@ import java.util.Map;
  */
 public class JsonHelper {
 
-  private static ObjectMapper mapper = new ObjectMapper();
+	private static ObjectMapper mapper = new ObjectMapper();
 
-  static {
-    mapper.registerModule(new Jdk8Module());
-  }
+	static {
+		mapper.registerModule(new Jdk8Module());
+	}
 
-  public static String json(Object object) {
-    try {
-      return mapper.writeValueAsString(object);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-  }
+	public static String json(Object object) {
+		try {
+			return mapper.writeValueAsString(object);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-  @SuppressWarnings("unchecked")
-  public static Map<String, String> desserializa(String json) {
-    try {
-      /*
-       * Alberto: #naoSeiExplicar Quando a mensagem estava desserializada simplesmente passando
-       * um map, eu acho que ele estava tentando inferir de maneira inteligente o tipo do dado.
-       * Quando era um int, ele tentava colocar Integer e aí, se em algum lugar fosse ser usado como
-       * String dava pau de cast. Isso aconteceu lá na classe {ProcessaCorrecaoViaModelosMachineLearning}
-       */
-      return mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
-  }
+	@SuppressWarnings("unchecked")
+	public static Map<String, String> desserializa(String json) {
+		try {
+			/*
+			 * Alberto: #naoSeiExplicar Quando a mensagem estava desserializada
+			 * simplesmente passando um map, eu acho que ele estava tentando
+			 * inferir de maneira inteligente o tipo do dado. Quando era um int,
+			 * ele tentava colocar Integer e aí, se em algum lugar fosse ser
+			 * usado como String dava pau de cast. 
+			 */
+			return mapper.readValue(json,
+					new TypeReference<Map<String, String>>() {
+					});
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static <T> T desserializa(Map<String, String> origem,
+			Class<T> targetClass) {
+		return mapper.convertValue(origem, targetClass);
+	}
 }

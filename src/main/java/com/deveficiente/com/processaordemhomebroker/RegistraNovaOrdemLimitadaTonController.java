@@ -1,5 +1,9 @@
 package com.deveficiente.com.processaordemhomebroker;
 
+import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.deveficiente.com.processaordemhomebroker.compartilhado.Log5WBuilder;
 import com.deveficiente.com.processaordemhomebroker.compartilhado.Resultado;
 
 import jakarta.validation.Valid;
@@ -24,6 +29,10 @@ public class RegistraNovaOrdemLimitadaTonController {
 
     private JmsTemplate jmsTemplate;
     private ClienteRepository clienteRepository;
+    
+	private static final Logger log = LoggerFactory
+			.getLogger(RegistraNovaOrdemLimitadaTonController.class);
+
 
     RegistraNovaOrdemLimitadaTonController(JmsTemplate jmsTemplate,ClienteRepository clienteRepository) {
         this.jmsTemplate = jmsTemplate;
@@ -68,7 +77,23 @@ public class RegistraNovaOrdemLimitadaTonController {
             throw resultado.getProblema();
          }
          
-
-        jmsTemplate.convertAndSend("insere-book-ofertas-limitada-ton", request.toMessage());
+        //preciso adicionar o tipo da validade aqui, mas o meu guideline recomenda nao alterar estado de quem você não criou
+         
+        HashMap<String, String> mensagem = new HashMap<>(request.toMessage().toMap());
+        mensagem.put("tipoValidade", TipoValidade.TON.name());
+        
+        Log5WBuilder
+        	.metodo()
+        	.oQueEstaAcontecendo("Enviando nova ordem limitada para o book")
+        	.adicionaInformacao("mensagem", mensagem.toString())
+        	.info(log);
+        
+        jmsTemplate.convertAndSend("insere-book-ofertas-limitada", mensagem);
+        
+        Log5WBuilder
+    	.metodo()
+    	.oQueEstaAcontecendo("Ordem enviada para o book de ofertas")
+    	.adicionaInformacao("mensagem", mensagem.toString())
+    	.info(log);        
     }
 }
