@@ -1,10 +1,12 @@
 package com.deveficiente.com.processaordemhomebroker;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -16,11 +18,15 @@ import jakarta.transaction.Transactional;
 public class RegistraNovaOrdemLimitadaTonBookOfertasListener {
 
 	private BookOfertasRepository bookOfertasRepository;
+	private JmsTemplate jmsTemplate;
+
+
 	private static final Logger log = LoggerFactory
 	.getLogger(RegistraNovaOrdemLimitadaTonBookOfertasListener.class);
 
-	public RegistraNovaOrdemLimitadaTonBookOfertasListener(BookOfertasRepository bookOfertasRepository) {
+	public RegistraNovaOrdemLimitadaTonBookOfertasListener(BookOfertasRepository bookOfertasRepository,JmsTemplate jmsTemplate) {
 		this.bookOfertasRepository = bookOfertasRepository;
+		this.jmsTemplate = jmsTemplate;
 	}	
 
 	
@@ -53,7 +59,14 @@ public class RegistraNovaOrdemLimitadaTonBookOfertasListener {
 			.adicionaInformacao("instante", novaOrdemAdicionada.getInstante().toString())
 			.info(log);	
 
-		//mandan processar a ordem
+		/*
+		 * Aqui eu tenho uma dúvida, qual a restrição para processar a ordem. Até acabar de processar uma ordem 
+		 * inserida no book pode chegar uma outra que altere o estado do book. Isso é aceitável
+		 * ou precisa de um snapshot do book? Apesar que o snapshot não parece escalável
+		 */
+		
+		this.jmsTemplate.convertAndSend("processa-ordem-limitada-ton", Map.of("ordemId", novaOrdemAdicionada.getCodigo()));
+		
 			
 		
 

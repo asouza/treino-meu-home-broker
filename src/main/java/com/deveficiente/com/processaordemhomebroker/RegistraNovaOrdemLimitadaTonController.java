@@ -1,9 +1,13 @@
 package com.deveficiente.com.processaordemhomebroker;
 
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.deveficiente.com.processaordemhomebroker.compartilhado.Resultado;
 
 import jakarta.validation.Valid;
 
@@ -19,14 +23,16 @@ public class RegistraNovaOrdemLimitadaTonController {
      */
 
     private JmsTemplate jmsTemplate;
+    private ClienteRepository clienteRepository;
 
-    RegistraNovaOrdemLimitadaTonController(JmsTemplate jmsTemplate) {
+    RegistraNovaOrdemLimitadaTonController(JmsTemplate jmsTemplate,ClienteRepository clienteRepository) {
         this.jmsTemplate = jmsTemplate;
+        this.clienteRepository = clienteRepository;
     }
     
     
-    @PostMapping("/api/ordens/limitada-ton")
-    public void executa(@RequestBody @Valid NovaOrdemLimitadaTONRequest request) {
+    @PostMapping("/api/ordens/{codigoCliente}/limitada-ton")
+    public void executa(@PathVariable("codigoCliente") String codigoCliente,@RequestBody @Valid NovaOrdemLimitadaTONRequest request) {
 
         /*
          * Ideia 1:
@@ -45,6 +51,23 @@ public class RegistraNovaOrdemLimitadaTonController {
           * o que deve facilitar quaisquer alterações no futuro. 
           * 
           */
+
+        /*
+         * - carregar o cliente
+         * - verificar se for para comprar, verificar se tem saldo
+         * - verificar se for para vender, verificar se tem ativo na quantidade
+         */
+
+         //aqui depois é para trocar por autenticado e tal..
+         Cliente clienteSolicitante = clienteRepository.getByCodigo(codigoCliente);
+         Assert.notNull(clienteSolicitante, "Não tem cliente com este o código "+codigoCliente);
+
+         Resultado<RuntimeException,Void> resultado = clienteSolicitante.podeRealizarOperacao(request);
+
+         if(resultado.temErro()){
+            throw resultado.getProblema();
+         }
+         
 
         jmsTemplate.convertAndSend("insere-book-ofertas-limitada-ton", request.toMessage());
     }

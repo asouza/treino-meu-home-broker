@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Positive;
 
 //configurar jackson para ler os atributos privados na serialiazacao
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class NovaOrdemLimitadaTONRequest {
+public class NovaOrdemLimitadaTONRequest implements InfoOperacao{
 
     @NotBlank
     private String ativo;
@@ -21,7 +21,7 @@ public class NovaOrdemLimitadaTONRequest {
     @NotBlank
     private String codigoCorretora;
     @NotNull
-    private TipoOferta tipoOrdem;
+    private TipoOferta tipoOferta;
     @Positive
     private BigDecimal preco;
 
@@ -41,18 +41,38 @@ public class NovaOrdemLimitadaTONRequest {
         this.ativo = ativo;
         this.quantidade = quantidade;
         this.codigoCorretora = codigoCorretora;
-        this.tipoOrdem = tipoOrdem;
+        this.tipoOferta = tipoOrdem;
         this.preco = preco;
     }
 
     @Override
     public String toString() {
         return "NovaOrdemimitadaEOCRequest [ativo=" + ativo + ", quantidade=" + quantidade + ", codigoCorretora="
-                + codigoCorretora + ", tipoOrdem=" + tipoOrdem + ", preco=" + preco + "]";
+                + codigoCorretora + ", tipoOrdem=" + tipoOferta + ", preco=" + preco + "]";
     }
 
     public NovaOrdemLimitadaTonMessage toMessage() {
-        return new NovaOrdemLimitadaTonMessage(ativo, quantidade, codigoCorretora, tipoOrdem, preco);
+        return new NovaOrdemLimitadaTonMessage(ativo, quantidade, codigoCorretora, tipoOferta, preco);
+    }
+
+    @Override
+    public int getQuantidade() {
+        return this.quantidade;
+    }
+
+    @Override
+    public BigDecimal getPreco() {
+        return this.preco;
+    }
+
+    @Override
+    public TipoOferta getTipoOferta() {
+        return tipoOferta;
+    }
+
+    @Override
+    public String getAtivo() {
+        return this.ativo;
     }
 
     

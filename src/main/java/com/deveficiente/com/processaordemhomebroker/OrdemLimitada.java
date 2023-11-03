@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -44,7 +45,9 @@ public class OrdemLimitada {
     private Map<String, String> dadosExtrasTipoValidade = new HashMap<>();
     @NotNull
     @Positive
-    private BigDecimal preco;        
+    private BigDecimal preco;
+    @NotNull
+	private UUID codigo;        
 
     @Deprecated
     public OrdemLimitada(){
@@ -60,8 +63,13 @@ public class OrdemLimitada {
         this.tipoOferta = tipoOferta;
         this.instante = LocalDateTime.now();
         this.dadosExtrasTipoValidade = dadosExtrasTipoValidade;
+        this.codigo = UUID.randomUUID();
     }
 
+    public UUID getCodigo() {
+		return codigo;
+	}
+    
     public String getAtivo() {
         return bookOfertas.getAtivo();
     }
@@ -96,6 +104,10 @@ public class OrdemLimitada {
 
     public TipoValidade getTipoValidade() {
         return tipoValidade;
+    }
+
+    public Long getId() {
+        return id;
     }
 
 
