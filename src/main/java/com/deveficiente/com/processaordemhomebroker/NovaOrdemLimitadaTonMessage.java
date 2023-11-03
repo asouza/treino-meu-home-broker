@@ -21,13 +21,13 @@ public class NovaOrdemLimitadaTonMessage {
     @NotBlank
     private String codigoCorretora;
     @NotNull
-    private TipoOrdem tipoOrdem;
+    private TipoOferta tipoOrdem;
     @Positive
     private BigDecimal preco;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     NovaOrdemLimitadaTonMessage(@NotBlank @JsonProperty("ativo") String ativo, @Min(1) @JsonProperty("quantidade") int quantidade, @NotBlank  @JsonProperty("codigoCorretora") String codigoCorretora,
-            @NotNull @JsonProperty("tipoOrdem") TipoOrdem tipoOrdem, @Positive @JsonProperty("preco") BigDecimal preco) {
+            @NotNull @JsonProperty("tipoOrdem") TipoOferta tipoOrdem, @Positive @JsonProperty("preco") BigDecimal preco) {
         this.ativo = ativo;
         this.quantidade = quantidade;
         this.codigoCorretora = codigoCorretora;
@@ -35,9 +35,26 @@ public class NovaOrdemLimitadaTonMessage {
         this.preco = preco;
     }
 
+    public String getAtivo() {
+        return ativo;
+    }
+
     @Override
     public String toString() {
         return "NovaOrdemLimitadaTonMessage [ativo=" + ativo + ", quantidade=" + quantidade + ", codigoCorretora="
                 + codigoCorretora + ", tipoOrdem=" + tipoOrdem + ", preco=" + preco + "]";
     }
+
+    public Ordem toModel(BookOfertas bookOfertas) {
+        //aqui tem que usar um builder para criar a ordem considerando a especificidade
+        //Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora, tipoOrdem, preco)
+        //precisa enriquecer a ordem com o tipo dela(mercado,limitada etc,), validadade e infos especificas.
+        //Se for limitada -> tem preco
+        return Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora, tipoOrdem, preco);
+    }
+
+    public BigDecimal getPreco() {
+        return preco;
+    }
+
 }

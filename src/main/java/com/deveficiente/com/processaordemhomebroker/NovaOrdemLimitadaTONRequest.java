@@ -21,7 +21,7 @@ public class NovaOrdemLimitadaTONRequest {
     @NotBlank
     private String codigoCorretora;
     @NotNull
-    private TipoOrdem tipoOrdem;
+    private TipoOferta tipoOrdem;
     @Positive
     private BigDecimal preco;
 
@@ -37,7 +37,7 @@ public class NovaOrdemLimitadaTONRequest {
      */
 
     NovaOrdemLimitadaTONRequest(@NotBlank String ativo, @Min(1) int quantidade, @NotBlank String codigoCorretora,
-            @NotNull TipoOrdem tipoOrdem, @Positive BigDecimal preco) {
+            @NotNull TipoOferta tipoOrdem, @Positive BigDecimal preco) {
         this.ativo = ativo;
         this.quantidade = quantidade;
         this.codigoCorretora = codigoCorretora;
