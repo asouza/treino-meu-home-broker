@@ -11,6 +11,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import com.deveficiente.com.processaordemhomebroker.compartilhado.ExecutaTransacao;
 import com.deveficiente.com.processaordemhomebroker.compartilhado.Log5WBuilder;
 
 import jakarta.transaction.Transactional;
@@ -21,20 +22,22 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 	private BookOfertasRepository bookOfertasRepository;
 	private ClienteRepository clienteRepository;
 	private JmsTemplate jmsTemplate;
+	private ExecutaTransacao executaTransacao;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(RegistraNovaOrdemLimitadaBookOfertasListener.class);
 
 	public RegistraNovaOrdemLimitadaBookOfertasListener(
 			BookOfertasRepository bookOfertasRepository,
-			ClienteRepository clienteRepository, JmsTemplate jmsTemplate) {
+			ClienteRepository clienteRepository, JmsTemplate jmsTemplate,
+			ExecutaTransacao executaTransacao) {
 		this.bookOfertasRepository = bookOfertasRepository;
 		this.clienteRepository = clienteRepository;
 		this.jmsTemplate = jmsTemplate;
+		this.executaTransacao = executaTransacao;
 	}
 
 	@JmsListener(destination = "insere-book-ofertas-limitada", containerFactory = "myFactory")
-	@Transactional
 	public void receiveMessage(Map<String, String> mensagem) {
 
 		Assert.isTrue(mensagem.containsKey("tipoValidade"),
@@ -72,10 +75,13 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 		
 		Cliente cliente = clienteRepository.getByCodigo(mensagem.get("codigoCliente"));
 
-		OrdemLimitada novaOrdemAdicionada = possivelBook.get()
-				.adiciona(bookOfertas -> {
-					return novaOrdemLimitadaMessage.toModel(bookOfertas,cliente);
-				});
+		OrdemLimitada novaOrdemAdicionada = executaTransacao.comRetorno(() -> {
+			 return possivelBook.get()
+					.adiciona(bookOfertas -> {
+						return novaOrdemLimitadaMessage.toModel(bookOfertas,cliente);
+					});
+			
+		});
 
 		Log5WBuilder.metodo().oQueEstaAcontecendo("Nova ordem salva")
 				.adicionaInformacao("ativo", novaOrdemAdicionada.getAtivo())
@@ -93,7 +99,7 @@ public class RegistraNovaOrdemLimitadaBookOfertasListener {
 		 */
 
 		this.jmsTemplate.convertAndSend("processa-ordem-limitada-ton",
-				Map.of("ordemId", novaOrdemAdicionada.getCodigo()));
+				Map.of("codigoOrdem", novaOrdemAdicionada.getCodigo()));
 
 	}
 }
