@@ -47,15 +47,19 @@ public class OrdemLimitada {
     @Positive
     private BigDecimal preco;
     @NotNull
-	private UUID codigo;        
+	private UUID codigo;
+    @ManyToOne
+    @NotNull
+	private Cliente cliente;        
 
     @Deprecated
     public OrdemLimitada(){
 
     }
 
-    private OrdemLimitada(BookOfertas bookOfertas,TipoValidade tipoValidade,BigDecimal preco ,int quantidade, String codigoCorretora, TipoOferta tipoOferta, Map<String, String> dadosExtrasTipoValidade) {
+    private OrdemLimitada(BookOfertas bookOfertas,Cliente cliente, TipoValidade tipoValidade,BigDecimal preco ,int quantidade, String codigoCorretora, TipoOferta tipoOferta, Map<String, String> dadosExtrasTipoValidade) {
         this.bookOfertas = bookOfertas;
+        this.cliente = cliente;
         this.tipoValidade = tipoValidade;
         this.preco = preco;
         this.quantidade = quantidade;
@@ -78,11 +82,11 @@ public class OrdemLimitada {
         return instante;
     }
 
-    public static OrdemLimitada novaLimitadaTON(BookOfertas bookOfertas, @Min(1) int quantidade,
+    public static OrdemLimitada novaLimitadaTON(BookOfertas bookOfertas, Cliente cliente, @Min(1) int quantidade,
             @NotBlank String codigoCorretora, @NotNull TipoOferta tipoOrdem, @Positive BigDecimal preco) {
         Map<String,String> dadosExtrasTipoValidade = new HashMap<>();
 
-        return new OrdemLimitada(bookOfertas,TipoValidade.TON ,preco,quantidade, codigoCorretora, tipoOrdem,dadosExtrasTipoValidade);
+        return new OrdemLimitada(bookOfertas,cliente,TipoValidade.TON ,preco,quantidade, codigoCorretora, tipoOrdem,dadosExtrasTipoValidade);
     }
     
     /**
@@ -109,6 +113,10 @@ public class OrdemLimitada {
     public Long getId() {
         return id;
     }
+
+	public String getCodigoCliente() {
+		return this.cliente.getCodigo();
+	}
 
 
 }

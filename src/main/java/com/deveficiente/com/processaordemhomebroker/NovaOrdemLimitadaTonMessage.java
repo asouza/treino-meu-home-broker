@@ -50,7 +50,7 @@ public class NovaOrdemLimitadaTonMessage implements NovaOrdemLimitadaMessage {
 				+ ", tipoOrdem=" + tipoOferta + ", preco=" + preco + "]";
 	}
 
-	public OrdemLimitada toModel(BookOfertas bookOfertas) {
+	public OrdemLimitada toModel(BookOfertas bookOfertas,Cliente cliente) {
 		// aqui tem que usar um builder para criar a ordem considerando a
 		// especificidade
 		// Ordem.novaLimitadaTON(bookOfertas, quantidade, codigoCorretora,
@@ -58,7 +58,7 @@ public class NovaOrdemLimitadaTonMessage implements NovaOrdemLimitadaMessage {
 		// precisa enriquecer a ordem com o tipo dela(mercado,limitada etc,),
 		// validadade e infos especificas.
 		// Se for limitada -> tem preco
-		return OrdemLimitada.novaLimitadaTON(bookOfertas, quantidade,
+		return OrdemLimitada.novaLimitadaTON(bookOfertas,cliente, quantidade,
 				codigoCorretora, tipoOferta, preco);
 	}
 

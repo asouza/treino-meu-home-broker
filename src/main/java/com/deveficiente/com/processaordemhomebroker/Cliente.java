@@ -83,4 +83,8 @@ public class Cliente {
 		return this.saldoAtual;
 	}
 
+	public String getCodigo() {
+		return codigo;
+	}
+
 }

@@ -36,7 +36,8 @@ public class ListaOrdensBookOfertasController {
             return Map.of(
                 "preco",ordem.getPreco()
                 ,"quantidade",ordem.getQuantidade()
-                ,"tipoValidade",ordem.getTipoValidade());
+                ,"tipoValidade",ordem.getTipoValidade()
+                ,"cliente",ordem.getCodigoCliente());
         };
 
         return bookOfertas.getOrdensPorInstante()

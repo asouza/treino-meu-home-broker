@@ -81,6 +81,7 @@ public class RegistraNovaOrdemLimitadaTonController {
          
         HashMap<String, String> mensagem = new HashMap<>(request.toMessage().toMap());
         mensagem.put("tipoValidade", TipoValidade.TON.name());
+        mensagem.put("codigoCliente", codigoCliente);
         
         Log5WBuilder
         	.metodo()

@@ -14,6 +14,6 @@ public interface NovaOrdemLimitadaMessage {
 	
 	BigDecimal getPreco();
 	
-	OrdemLimitada toModel(BookOfertas bookOfertas);
+	OrdemLimitada toModel(BookOfertas bookOfertas, Cliente cliente);
 	
 }
