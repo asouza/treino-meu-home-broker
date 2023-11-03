@@ -123,9 +123,9 @@ public class Cliente {
 		if(execucao.isCompra()) {
 			//quero restringir a atualizacao da carteira para uma execucao
 			//poderia facilitar e passar uma ordem, um ativo. Quanto mais flexível, maior a chance de fazer caca
-			this.saldoAtual = this.saldoAtual.subtract(execucao.getPreco().get());
+			this.saldoAtual = this.saldoAtual.subtract(execucao.calculaValorTotal().get());
 		} else {
-			this.saldoAtual = this.saldoAtual.add(execucao.getPreco().get());
+			this.saldoAtual = this.saldoAtual.add(execucao.calculaValorTotal().get());
 		}
 		
 		

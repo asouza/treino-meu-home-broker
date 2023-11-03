@@ -3,7 +3,7 @@ package com.deveficiente.com.processaordemhomebroker;
 import jakarta.validation.constraints.Min;
 
 public enum TipoOferta {
-	venda(1), compra(-1);
+	venda(-1), compra(1);
 
 	private int multiplicador;
 

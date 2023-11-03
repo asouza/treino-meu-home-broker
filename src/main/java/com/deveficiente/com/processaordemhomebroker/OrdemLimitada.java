@@ -149,17 +149,22 @@ public class OrdemLimitada {
 		
 		//mau sinal ? Dois this na mesma linha sempre me chama atencao
 		
-		Optional<OrdemLimitada> melhorOferta = this.bookOfertas.buscaMelhorOfertaLimitada(this);
+		Optional<OrdemLimitada> melhorOferta = this.bookOfertas.buscaMelhorOfertaLimitadaExata(this);
 		if(melhorOferta.isPresent()) {
-			ExecucaoOrdem execucao = this.adicionaOperacaoSucesso(melhorOferta.get());
-			this.cliente.atualizaCarteira(execucao);
+			ParExecucaoOrdem parExecucoes = this.criaOperacaoSucesso(melhorOferta.get());
+			
+			this.execucoes.add(parExecucoes.getOrigemExecucao());
+			melhorOferta.get().execucoes.add(parExecucoes.getMatchExecucao());
+			
+			parExecucoes.atualizaClientes();			
 			return Resultado.sucessoSemInfoAdicional();					
 		}
 		
+		this.execucoes.add(ExecucaoOrdem.falha(this));
 		return Resultado.falhaCom(new NaoAchouMatchParaOrdemLimitadaException(this,"Não encontramos uma match para a ordem "+this.codigo));
 	}
 	
-	private ExecucaoOrdem adicionaOperacaoSucesso(OrdemLimitada ordemLimitada) {
+	private ParExecucaoOrdem criaOperacaoSucesso(OrdemLimitada match) {
 		/*
 		 * - crio a nova operacao de sucesso com a ordem atual, a outra, no instante
 		 * - adiciono a operacao de sucesso na lista de operacoes da ordem
@@ -171,10 +176,13 @@ public class OrdemLimitada {
 				,"Não pode ter execucoes de sucesso para uma mesma ordem");
 		
 		//aqui não pode ser um set, pq eu talvez possa ter duas execucoes de falha
-		ExecucaoOrdem execucaoSucesso = ExecucaoOrdem.sucesso(this,ordemLimitada);
-		this.execucoes.add(execucaoSucesso);
 		
-		return execucaoSucesso;
+		//estou em dúvida do melhor nome para essas variaveis
+		//e o melhor era pergunta se realmente são duas execucoes
+		ExecucaoOrdem execucaoSucessoOrigem = ExecucaoOrdem.sucesso(this,match);
+		ExecucaoOrdem execucaoSucessoMatch = ExecucaoOrdem.sucesso(match,this);
+		
+		return new ParExecucaoOrdem(execucaoSucessoOrigem,execucaoSucessoMatch);
 		
 		
 	}
@@ -239,6 +247,20 @@ public class OrdemLimitada {
 		Assert.isTrue(execucoesSucesso <= 1, "Uma ordem nunca poderia ser executada com sucesso mais de uma vez. Falha grave");
 		
 		return execucoesSucesso == 1;
+	}
+
+	public Cliente getCliente() {
+		return this.cliente;
+	}
+
+	public boolean quantidadeIgual(OrdemLimitada outraOrdem) {
+		Assert.isTrue(isOposta(outraOrdem), "Só faz sentido verificar quantidade necessária para ordens opostas");
+				
+		return this.quantidade == outraOrdem.quantidade;
+	}
+
+	public BigDecimal calculaValorTotal() {
+		return this.preco.multiply(new BigDecimal(this.quantidade));
 	}
 
 

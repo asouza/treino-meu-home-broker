@@ -24,6 +24,11 @@ public class ExecucaoOrdem {
 	@NotNull
 	private StatusExecucao status;
 	private LocalDateTime instante = LocalDateTime.now();
+	
+	@Deprecated
+	public ExecucaoOrdem() {
+		// TODO Auto-generated constructor stub
+	}
 
 	private ExecucaoOrdem(OrdemLimitada origem, OrdemLimitada match) {
 		this.origem = origem;
@@ -73,6 +78,16 @@ public class ExecucaoOrdem {
 
 	public String getAtivo() {
 		return this.origem.getAtivo();
+	}
+
+	public void atualizaCliente() {
+		origem.getCliente().atualizaCarteira(this);
+	}
+
+	public Optional<BigDecimal> calculaValorTotal() {
+		return Optional
+				.ofNullable(this.match)
+				.map(match -> match.calculaValorTotal());
 	}
 
 }

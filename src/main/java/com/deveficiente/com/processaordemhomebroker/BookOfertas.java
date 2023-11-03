@@ -69,13 +69,14 @@ public class BookOfertas {
 		return this.ativo.equals(ativo);
 	}
 
-	public Optional<OrdemLimitada> buscaMelhorOfertaLimitada(
+	public Optional<OrdemLimitada> buscaMelhorOfertaLimitadaExata(
 			OrdemLimitada ordemLimitada) {
 
 		return this.ordensCompra.stream()
 				.filter(ordem -> !ordem.foiExecutadaComSucesso())
 				.filter(ordem -> ordem.isOposta(ordemLimitada))
 				.filter(ordem -> ordem.precoDentroDoLimite(ordemLimitada))
+				.filter(ordem -> ordem.quantidadeIgual(ordemLimitada))
 				.sorted(ordemLimitada.funcaoOrdenaPorMelhorPreco())
 				.findFirst();
 
