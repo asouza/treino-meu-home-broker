@@ -138,7 +138,8 @@ public class OrdemLimitada {
 	}
 
 	public Resultado<RuntimeException, Void> executa() {
-		//se já foi executada, não pode de novo
+		Assert.isTrue(!this.foiExecutadaComSucesso()
+				,"Não pode ter execucoes de sucesso para uma mesma ordem");		
 
 		/*
 		 * - precisa achar uma ordem de compra ou venda de um ativo com a 
