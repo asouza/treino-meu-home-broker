@@ -11,5 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 public interface BookOfertasRepository extends JpaRepository<BookOfertas, Long>{
 
     Optional<BookOfertas> findByAtivo(@NotBlank String ativo);
+    
+    
 
 }

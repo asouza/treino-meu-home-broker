@@ -137,7 +137,7 @@ public class OrdemLimitada {
 		return this.bookOfertas.pertenceAAtivo(ativo);
 	}
 
-	public Resultado<RuntimeException, Void> executa() {
+	public Resultado<RuntimeException, Void> executa(AcessoMelhoresOfertas melhoresOfertas) {
 		Assert.isTrue(!this.foiExecutadaComSucesso()
 				,"Não pode ter execucoes de sucesso para uma mesma ordem");		
 
@@ -150,7 +150,9 @@ public class OrdemLimitada {
 		
 		//mau sinal ? Dois this na mesma linha sempre me chama atencao
 		
-		Optional<OrdemLimitada> melhorOferta = this.bookOfertas.buscaMelhorOfertaLimitadaExata(this);
+		//TODO #refactor aqui eu posso receber uma abstração para buscar as melhores ofertas de maneira otimizada
+		
+		Optional<OrdemLimitada> melhorOferta = melhoresOfertas.buscaMelhorOferta(this);
 		if(melhorOferta.isPresent()) {
 			ParExecucaoOrdem parExecucoes = this.criaOperacaoSucesso(melhorOferta.get());
 			
@@ -202,6 +204,7 @@ public class OrdemLimitada {
 		return this.preco.compareTo(outraOrdem.preco) >= 0;
 	}
 	
+	//TODO #refactor Isso aqui pode realmente ser uma função
 	public Comparator<OrdemLimitada> funcaoOrdenaPorMelhorPreco() {
 		
 		//se a ordem de compra, a funcao deve ordenar os precos do menor para o maior dentro do limite
@@ -262,6 +265,15 @@ public class OrdemLimitada {
 
 	public BigDecimal calculaValorTotal() {
 		return this.preco.multiply(new BigDecimal(this.quantidade));
+	}
+
+	public BookOfertas getBookOfertas() {
+		return bookOfertas;
+	}
+
+	public TipoOferta getTipoOfertaOposta() {
+		//delegando a chamada para mais perto do estado você tende a diminuir ifs
+		return this.tipoOferta.oposta();
 	}
 
 

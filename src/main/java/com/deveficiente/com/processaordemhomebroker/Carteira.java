@@ -40,6 +40,7 @@ public class Carteira {
 
 
 	public Resultado<RuntimeException, Void> possuiAtivo(String codigoAtivo, int quantidade) {
+		//primeiro tem que juntar todos os ativos iguais
     	boolean temAtivo = ativos
             .stream()
             .filter(ativo -> ativo.isMesmo(codigoAtivo))            
@@ -57,6 +58,7 @@ public class Carteira {
 
 
 	public void atualizaAtivos(ExecucaoOrdem execucao) {
+		//aqui talvez o melhor fosse deixar bem nitida a regra de execucao (que no caso é registrar a perda ou adicao de ativos)
 		this.ativos.add(execucao.toAtivo());
 	}
 

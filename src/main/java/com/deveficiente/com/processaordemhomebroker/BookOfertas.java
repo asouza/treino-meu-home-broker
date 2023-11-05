@@ -28,7 +28,7 @@ public class BookOfertas {
 	private Long id;
 	@OneToMany(mappedBy = "bookOfertas", cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE })
-	private List<OrdemLimitada> ordensCompra = new ArrayList<>();
+	private List<OrdemLimitada> ordens = new ArrayList<>();
 	private String ativo;
 
 	@Deprecated
@@ -50,7 +50,7 @@ public class BookOfertas {
 				"No book de ofertas do ativo " + ativo
 						+ " só entra ordem do mesmo ativo");
 
-		this.ordensCompra.add(ordem);
+		this.ordens.add(ordem);
 
 		return ordem;
 	}
@@ -60,7 +60,7 @@ public class BookOfertas {
 	}
 
 	public List<OrdemLimitada> getOrdensPorInstante() {
-		return ordensCompra.stream().sorted(
+		return ordens.stream().sorted(
 				(o1, o2) -> o1.getInstante().compareTo(o2.getInstante()))
 				.collect(Collectors.toList());
 	}
@@ -72,7 +72,7 @@ public class BookOfertas {
 	public Optional<OrdemLimitada> buscaMelhorOfertaLimitadaExata(
 			OrdemLimitada ordemLimitada) {
 
-		return this.ordensCompra.stream()
+		return this.ordens.stream()
 				.filter(ordem -> !ordem.foiExecutadaComSucesso())
 				.filter(ordem -> ordem.isOposta(ordemLimitada))
 				.filter(ordem -> ordem.precoDentroDoLimite(ordemLimitada))
@@ -80,6 +80,10 @@ public class BookOfertas {
 				.sorted(ordemLimitada.funcaoOrdenaPorMelhorPreco())
 				.findFirst();
 
+	}
+
+	public Long getId() {
+		return id;
 	}
 
 }

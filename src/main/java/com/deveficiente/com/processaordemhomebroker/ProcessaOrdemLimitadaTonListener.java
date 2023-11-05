@@ -18,14 +18,17 @@ import jakarta.transaction.Transactional;
 public class ProcessaOrdemLimitadaTonListener {
 
 	private OrdemLimitadaRepository ordemLimitadaRepository;
+	private AcessoMelhoresOfertas acessoMelhoresOfertas;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(ProcessaOrdemLimitadaTonListener.class);
 
 	public ProcessaOrdemLimitadaTonListener(
-			OrdemLimitadaRepository ordemLimitadaRepository) {
+			OrdemLimitadaRepository ordemLimitadaRepository,
+			AcessoMelhoresOfertas acessoMelhoresOfertas) {
 		super();
 		this.ordemLimitadaRepository = ordemLimitadaRepository;
+		this.acessoMelhoresOfertas = acessoMelhoresOfertas;
 	}
 
 	@JmsListener(destination = "processa-ordem-limitada-ton", containerFactory = "myFactory")
@@ -43,21 +46,16 @@ public class ProcessaOrdemLimitadaTonListener {
 				"Não deveria chegar um código de ordem inexistente aqui "
 						+ codigoOrdem);
 
-		Log5WBuilder
-			.metodo()
-			.oQueEstaAcontecendo("Vai executar a ordem")
-			.adicionaInformacao("codigoOrdem", codigoOrdem)
-			.info(log);
+		Log5WBuilder.metodo().oQueEstaAcontecendo("Vai executar a ordem")
+				.adicionaInformacao("codigoOrdem", codigoOrdem).info(log);
 
 		Resultado<RuntimeException, Void> resultado = ordemParaSerProcessada
-				.executa();
+				.executa(acessoMelhoresOfertas);
 
-		Log5WBuilder
-			.metodo()
-			.oQueEstaAcontecendo("Executou a ordem")
-			.adicionaInformacao("codigoOrdem", codigoOrdem)
-			.adicionaInformacao("sucesso ?", resultado.isSucesso()+"")			
-			.info(log);
+		Log5WBuilder.metodo().oQueEstaAcontecendo("Executou a ordem")
+				.adicionaInformacao("codigoOrdem", codigoOrdem)
+				.adicionaInformacao("sucesso ?", resultado.isSucesso() + "")
+				.info(log);
 
 	}
 }
