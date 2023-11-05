@@ -35,6 +35,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 @Entity
+//20 icps (usando metrica default)
 public class OrdemLimitada {
 
     @Id
@@ -45,10 +46,13 @@ public class OrdemLimitada {
     @NotBlank
     private String codigoCorretora;
     @NotNull
+    //1
     private TipoOferta tipoOferta;
     @ManyToOne
+    //1
     private BookOfertas bookOfertas;
     private LocalDateTime instante;
+    //1    
     private TipoValidade tipoValidade;
 
     @ElementCollection
@@ -62,9 +66,11 @@ public class OrdemLimitada {
 	private UUID codigo;
     @ManyToOne
     @NotNull
+    //1    
 	private Cliente cliente;
     
     @OneToMany(mappedBy = "origem",cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    //1    
 	private List<ExecucaoOrdem> execucoes = new ArrayList<>();        
 
     @Deprecated
@@ -137,6 +143,7 @@ public class OrdemLimitada {
 		return this.bookOfertas.pertenceAAtivo(ativo);
 	}
 
+    //1
 	public Resultado<RuntimeException, Void> executa(AcessoMelhoresOfertas melhoresOfertas) {
 		Assert.isTrue(!this.foiExecutadaComSucesso()
 				,"Não pode ter execucoes de sucesso para uma mesma ordem");		
@@ -153,17 +160,21 @@ public class OrdemLimitada {
 		//TODO #refactor aqui eu posso receber uma abstração para buscar as melhores ofertas de maneira otimizada
 		
 		Optional<OrdemLimitada> melhorOferta = melhoresOfertas.buscaMelhorOferta(this);
+	    //1		
 		if(melhorOferta.isPresent()) {
+		    //1			
 			ParExecucaoOrdem parExecucoes = this.criaOperacaoSucesso(melhorOferta.get());
 			
 			this.execucoes.add(parExecucoes.getOrigemExecucao());
 			melhorOferta.get().execucoes.add(parExecucoes.getMatchExecucao());
 			
-			parExecucoes.atualizaClientes();			
+			parExecucoes.atualizaClientes();
+		    //1
 			return Resultado.sucessoSemInfoAdicional();					
 		}
 		
 		this.execucoes.add(ExecucaoOrdem.falha(this));
+	    //1
 		return Resultado.falhaCom(new NaoAchouMatchParaOrdemLimitadaException(this,"Não encontramos uma match para a ordem "+this.codigo));
 	}
 	
@@ -191,16 +202,19 @@ public class OrdemLimitada {
 	}
 
 	public boolean isOposta(OrdemLimitada outraOrdem) {
+	    //1
 		return this.tipoOferta != outraOrdem.tipoOferta;
 	}
 
 	
 	public boolean precoDentroDoLimite(OrdemLimitada outraOrdem) {
 		Assert.isTrue(isOposta(outraOrdem), "Só faz sentido verificar limite para ordens opostas");
-		
+	    //1
 		if(outraOrdem.tipoOferta == TipoOferta.compra) {
+		    //1
 			return this.preco.compareTo(outraOrdem.preco) <= 0;
 		}
+	    //1
 		return this.preco.compareTo(outraOrdem.preco) >= 0;
 	}
 	
@@ -212,11 +226,11 @@ public class OrdemLimitada {
 		
 		return (o1,o2) -> {
 				int ordemPreco = o1.getPreco().compareTo(o2.getPreco());
-				
+			    //1
 				if(ordemPreco == 0) {
 					return o1.getInstante().compareTo(o2.getInstante());					
 				}
-				
+			    //1
 				if(OrdemLimitada.this.tipoOferta == TipoOferta.compra) {
 					//se for uma ordem de compra, a ordenacao precisa ser do menor para maior
 					ordemPreco = ordemPreco * -1;
@@ -230,6 +244,7 @@ public class OrdemLimitada {
 		
 
 	public boolean isCompra() {
+	    //1
 		return this.tipoOferta == TipoOferta.compra;
 	}
 
@@ -245,11 +260,14 @@ public class OrdemLimitada {
 		long execucoesSucesso = this
 			.execucoes
 			.stream()
+		    //1
 			.filter(execucao -> execucao.isSucesso())
 			.count();
 		
+	    //1
 		Assert.isTrue(execucoesSucesso <= 1, "Uma ordem nunca poderia ser executada com sucesso mais de uma vez. Falha grave");
 		
+	    //1
 		return execucoesSucesso == 1;
 	}
 
