@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.util.Assert;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +33,7 @@ public class ExecucaoOrdem {
 	}
 
 	private ExecucaoOrdem(OrdemLimitada origem, OrdemLimitada match) {
+		Assert.isTrue(origem.isOposta(match), "Não se cria execucao com duas ordens com mesmo tipo de oferta");
 		this.origem = origem;
 		this.match = match;
 		this.status = StatusExecucao.sucesso;
